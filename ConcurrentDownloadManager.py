@@ -1,8 +1,8 @@
 import os
 import requests
-import threading
 import concurrent.futures
 from AtomicCounter import AtomicCounter
+
 
 class ConcurrentDownloadManager:
     def __init__(self, num_threads=None):
@@ -20,10 +20,10 @@ class ConcurrentDownloadManager:
             print(f'Downloaded files: {self.downloadedFilesCount.value}/{self.totalFilesCount}')
         except Exception as e:
             print(f'Exception in downloadFile({filename}, {url}):', e)
-    
+
     def downloadFiles(self, files_to_download):
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.num_threads) as executor:
-            self.totalFilesCount = len(files)
+            self.totalFilesCount = len(files_to_download)
             self.downloadedFilesCount = AtomicCounter(0)
             for file in files_to_download:
                 (filename, url) = file
