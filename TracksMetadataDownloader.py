@@ -60,5 +60,8 @@ loader.get_tracks_audio_features(loader.features_df['id'].head(50).tolist())
 loader.get_tracks_preview_urls(loader.features_df['id'].head(50).tolist())
 
 loader.features_df.to_csv('dafeatures.csv')
+
+downloads_manager = ConcurrentDownloadManager()
+downloads_manager.downloadFiles([(f"songs/{entry['id']}.mp3", entry['preview_url']) for _, entry in loader.features_df.head(50).drop.iterrows()])
 print(loader.features_df.shape)
 
