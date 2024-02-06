@@ -43,26 +43,35 @@ class TracksMetadataDownloader:
         result = self.sp.audio_features(track_ids)   
         audio_features = pd.DataFrame(result)
         audio_features.drop(['analysis_url', 'track_href', 'type', 'uri'], axis=1, inplace=True)
-        self.features_df = pd.merge(self.features_df, audio_features, on="id", how="left")
+        return audio_features
+        # self.features_df = pd.merge(self.features_df, audio_features, on="id", how="left")
         
 #     # get preview urls
     def get_tracks_preview_urls(self, track_ids):
         tracks = self.sp.tracks(track_ids)['tracks']
         track_previews = [(track['id'], track['preview_url']) for track in tracks]
         previews_df = pd.DataFrame(track_previews, columns=['id', 'preview_url'])
-        self.features_df = pd.merge(self.features_df, previews_df, on='id', how="left")
+        return previews_df
+        # self.features_df = pd.merge(self.features_df, previews_df, on='id', how="left")
 
-
-
+    def get_tracks_metadata(self):
+        limit = 50
+        audio_features = pd.DataFrame()
+        preview_urls = pd.DataFrame()
+        partitions = [self.features_df[i:i+limit] for i in range(0, self.features_df.shape[0], limit)]
+        for tracks in partitions:
+            audio_features = pd.concat([audio_features, self.get_tracks_audio_features(tracks['id'].tolist())])
+            preview_urls = pd.concat([preview_urls, self.get_tracks_preview_urls(tracks['id'].tolist())])
+        self.features_df = pd.merge(self.features_df, audio_features, on="id", how="left")
+        self.features_df = pd.merge(self.features_df, preview_urls, on="id", how="left")
 loader = TracksMetadataDownloader(playlist_dict)
 loader.playlist_tracks_ids_to_df()
-loader.get_tracks_audio_features(loader.features_df['id'].head(50).tolist())
-loader.get_tracks_preview_urls(loader.features_df['id'].head(50).tolist())
-
-loader.features_df.to_csv('dafeatures.csv')
+loader.get_tracks_metadata()
+print(loader.features_df.isna().sum())
+loader.features_df.to_csv('data/dafeatures.csv')
 
 downloads_manager = ConcurrentDownloadManager()
-downloads_manager.downloadFiles([(f"songs/{entry['id']}.mp3", entry['preview_url']) for _, entry in loader.features_df.head(50).iterrows()])
+downloads_manager.downloadFiles([(f"songs/{entry['id']}.mp3", entry['preview_url']) for _, entry in loader.features_df.iterrows()])
 
 print(loader.features_df.shape)
 
