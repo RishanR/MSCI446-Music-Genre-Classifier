@@ -1,2 +1,4 @@
 envsetup.sh
 __pycache__/
+songs/
+.cache
