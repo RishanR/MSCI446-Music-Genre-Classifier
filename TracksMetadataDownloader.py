@@ -64,7 +64,14 @@ class TracksMetadataDownloader:
             preview_urls = pd.concat([preview_urls, self.get_tracks_preview_urls(tracks['id'].tolist())])
         self.features_df = pd.merge(self.features_df, audio_features, on="id", how="left")
         self.features_df = pd.merge(self.features_df, preview_urls, on="id", how="left")
-loader = TracksMetadataDownloader(playlist_dict)
+
+
+playlist_genre_table_df = pd.read_csv('data/playlist_genre_sheet.csv')
+playlist_genre_dict = {}
+for key, value in playlist_genre_table_df.groupby('Genre')['Playlist URL']:
+    playlist_genre_dict[key] = value.tolist()
+
+loader = TracksMetadataDownloader(playlist_genre_dict)
 loader.playlist_tracks_ids_to_df()
 loader.get_tracks_metadata()
 print(loader.features_df.isna().sum())
@@ -74,4 +81,3 @@ downloads_manager = ConcurrentDownloadManager()
 downloads_manager.downloadFiles([(f"songs/{entry['id']}.mp3", entry['preview_url']) for _, entry in loader.features_df.iterrows()])
 
 print(loader.features_df.shape)
-
