@@ -3,7 +3,6 @@ import pandas as pd
 from spotipy.oauth2 import SpotifyClientCredentials
 from typing import List
 from ConcurrentDownloadManager import ConcurrentDownloadManager
-import pprint
 
 playlist_dict = {
     'RNB': [
