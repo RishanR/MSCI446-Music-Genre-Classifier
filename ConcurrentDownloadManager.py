@@ -2,6 +2,7 @@ import os
 import requests
 import concurrent.futures
 from AtomicCounter import AtomicCounter
+import pandas as pd
 
 
 class ConcurrentDownloadManager:
@@ -43,3 +44,7 @@ class ConcurrentDownloadManager:
 # ]
 #
 # download_manager.downloadFiles(files)
+
+data_df = pd.read_csv("data/filtered_music_data.csv")
+downloads_manager = ConcurrentDownloadManager()
+downloads_manager.downloadFiles([(f"songs/{entry['id']}.mp3", entry['preview_url']) for _, entry in data_df.iterrows()])
