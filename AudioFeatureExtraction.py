@@ -19,9 +19,9 @@ class AudioFeatureExtraction:
     def extract_audio_features(self):
         audio_features_dict = defaultdict(list)
 
-        for _, entry in self.data_df.iterrows():
+        for i, entry in self.data_df.iterrows():
             audio_features_dict['id'].append(entry['id'])
-
+            print(f"Downloading song {i+1}/{self.data_df.shape[0]}")
             audio_series, sample_rate = librosa.load(f"songs/{entry['id']}.mp3", offset=0, duration=30)
             for i, val in enumerate(self._extract_mfcc_mean(audio_series, sample_rate)):
                 audio_features_dict[f"mfcc_{i+1}Mean"].append(val)
