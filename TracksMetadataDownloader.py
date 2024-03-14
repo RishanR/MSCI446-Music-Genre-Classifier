@@ -1,6 +1,6 @@
 import spotipy
 import pandas as pd
-from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.oauth2 import SpotifyOAuth
 from typing import List
 
 # playlist_dict = {
@@ -17,7 +17,8 @@ pd.set_option('display.max_colwidth', None)
 
 class TracksMetadataDownloader:
     def __init__(self, genre_playlist_dict: dict):
-        self.sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
+        scope = "user-library-read"
+        self.sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
         self.playlist_dict = genre_playlist_dict
         self.features_df = pd.DataFrame(columns=['id', 'genre'])
 
@@ -73,6 +74,6 @@ loader = TracksMetadataDownloader(playlist_genre_dict)
 loader.playlist_tracks_ids_to_df()
 loader.get_tracks_metadata()
 print(loader.features_df.isna().sum())
-loader.features_df.to_csv('data/dafeatures.csv')
+loader.features_df.to_csv('data/dafeatures.csv', index=False)
 
 print(loader.features_df.shape)
