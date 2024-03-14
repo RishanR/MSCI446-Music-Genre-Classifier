@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from collections import defaultdict
 import librosa
-from ConcurrentDownloadManager import ConcurrentDownloadManager
 
 class AudioFeatureExtraction:
     def __init__(self, data_df):
@@ -21,7 +20,7 @@ class AudioFeatureExtraction:
 
         for i, entry in self.data_df.iterrows():
             audio_features_dict['id'].append(entry['id'])
-            print(f"Downloading song {i+1}/{self.data_df.shape[0]}")
+            print(f"Extracting MFCC and Chroma: {i+1}/{self.data_df.shape[0]}")
             audio_series, sample_rate = librosa.load(f"songs/{entry['id']}.mp3", offset=0, duration=30)
             for i, val in enumerate(self._extract_mfcc_mean(audio_series, sample_rate)):
                 audio_features_dict[f"mfcc_{i+1}Mean"].append(val)
