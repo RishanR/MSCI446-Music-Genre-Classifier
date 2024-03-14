@@ -2,17 +2,16 @@ import spotipy
 import pandas as pd
 from spotipy.oauth2 import SpotifyClientCredentials
 from typing import List
-from ConcurrentDownloadManager import ConcurrentDownloadManager
 
-playlist_dict = {
-    'RNB': [
-        'https://open.spotify.com/playlist/37i9dQZF1DX7FY5ma9162x?si=d594920df161474f',
-    ],
-    'HipHop': [
-        'https://open.spotify.com/playlist/37i9dQZF1DWY6tYEFs22tT?si=e503cb873030413a',
-        'https://open.spotify.com/playlist/37i9dQZF1DX186v583rmzp?si=c33ed9096ed841b9',
-    ],
-}
+# playlist_dict = {
+#     'RNB': [
+#         'https://open.spotify.com/playlist/37i9dQZF1DX7FY5ma9162x?si=d594920df161474f',
+#     ],
+#     'HipHop': [
+#         'https://open.spotify.com/playlist/37i9dQZF1DWY6tYEFs22tT?si=e503cb873030413a',
+#         'https://open.spotify.com/playlist/37i9dQZF1DX186v583rmzp?si=c33ed9096ed841b9',
+#     ],
+# }
 pd.set_option('display.max_colwidth', None)
 
 
@@ -75,8 +74,5 @@ loader.playlist_tracks_ids_to_df()
 loader.get_tracks_metadata()
 print(loader.features_df.isna().sum())
 loader.features_df.to_csv('data/dafeatures.csv')
-
-downloads_manager = ConcurrentDownloadManager()
-downloads_manager.downloadFiles([(f"songs/{entry['id']}.mp3", entry['preview_url']) for _, entry in loader.features_df.iterrows()])
 
 print(loader.features_df.shape)
