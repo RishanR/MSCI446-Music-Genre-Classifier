@@ -44,10 +44,20 @@ class TracksMetadataDownloader:
         audio_features.drop(['analysis_url', 'track_href', 'type', 'uri'], axis=1, inplace=True)
         return audio_features
         # self.features_df = pd.merge(self.features_df, audio_features, on="id", how="left")
-        
+    
+    def get_tracks_artist_genres(self, tracks):
+        artist_genres = []
+        for track in tracks:
+            id = track['id']
+            artists = self.sp.artists([artist['id'] for artist in track['artists']])['artists']
+            genres = [genre for artist in artists for genre in artist['genres']]
+            genres = list(set(genres))
+            artist_genres.append((id, genres))
+        artist_genres_df = pd.DataFrame(artist_genres, columns=['id', 'artist_genre'])
+        return artist_genres_df
+
 #     # get preview urls
-    def get_tracks_preview_urls(self, track_ids):
-        tracks = self.sp.tracks(track_ids)['tracks']
+    def get_tracks_preview_urls(self, tracks):
         track_previews = [(track['id'], track['preview_url']) for track in tracks]
         previews_df = pd.DataFrame(track_previews, columns=['id', 'preview_url'])
         return previews_df
@@ -56,12 +66,17 @@ class TracksMetadataDownloader:
     def get_tracks_metadata(self):
         limit = 50
         audio_features = pd.DataFrame()
+        artist_genres = pd.DataFrame()
         preview_urls = pd.DataFrame()
+
         partitions = [self.features_df[i:i+limit] for i in range(0, self.features_df.shape[0], limit)]
         for tracks in partitions:
+            tracks = self.sp.tracks(tracks['id'].tolist())['tracks']
             audio_features = pd.concat([audio_features, self.get_tracks_audio_features(tracks['id'].tolist())])
-            preview_urls = pd.concat([preview_urls, self.get_tracks_preview_urls(tracks['id'].tolist())])
+            artist_genres = pd.concat([artist_genres, self.get_tracks_artist_genres(tracks)])
+            preview_urls = pd.concat([preview_urls, self.get_tracks_preview_urls(tracks)])
         self.features_df = pd.merge(self.features_df, audio_features, on="id", how="left")
+        self.features_df = pd.merge(self.features_df, artist_genres, on="id", how="left")
         self.features_df = pd.merge(self.features_df, preview_urls, on="id", how="left")
 
 
@@ -75,5 +90,3 @@ loader.playlist_tracks_ids_to_df()
 loader.get_tracks_metadata()
 print(loader.features_df.isna().sum())
 loader.features_df.to_csv('data/dafeatures.csv', index=False)
-
-print(loader.features_df.shape)
