@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 from collections import defaultdict
+import os
+os.environ['LIBROSA_CACHE_DIR'] = '/tmp/librosa_cache'
 import librosa
 
 class AudioFeatureExtraction:
@@ -29,7 +31,7 @@ class AudioFeatureExtraction:
     
     def _extract_spect_contrast(self, audio_series, sample_rate):
         spect_contrast = np.array(librosa.feature.spectral_contrast(y=audio_series, sr=sample_rate))
-        return (spect_contrast.mean(), spect_contrast.std()) 
+        return (spect_contrast.mean(), spect_contrast.std())
     
     def _extract_spect_bw(self, audio_series, sample_rate):
         spect_bw = np.array(librosa.feature.spectral_bandwidth(y=audio_series, sr=sample_rate))
@@ -83,16 +85,4 @@ class AudioFeatureExtraction:
             audio_features_dict[f"spect_rolloff_Std"].append(rolloff_val[1])
 
         return pd.DataFrame(audio_features_dict)
-    
-data_df = pd.read_csv("data/filtered_music_data.csv")
-
-print("Starting Audio Extraction...")
-
-audio_feature_extractor = AudioFeatureExtraction(data_df)
-audio_features_df = audio_feature_extractor.extract_audio_features()
-
-print("Finished Audio Extraction!")
-
-merged_df = pd.merge(data_df, audio_features_df, on='id')
-merged_df.to_csv("data/filtered_music_data_with_librosa_v2.csv", index=False)
 

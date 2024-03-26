@@ -10,13 +10,3 @@ class AtomicCounter:
         with self._lock:
             self.value += num
             return self.value
-
-# Example Usage:
-#
-# counter = AtomicCounter(0)
-#
-# counter.increment()
-# print(counter.value) - should be 1
-#
-# counter.increment(4)
-# print(counter.value) - should be 5

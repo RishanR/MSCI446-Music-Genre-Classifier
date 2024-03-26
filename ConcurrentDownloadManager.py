@@ -29,22 +29,3 @@ class ConcurrentDownloadManager:
             for file in files_to_download:
                 (filename, url) = file
                 executor.submit(self.downloadFile, filename=filename, url=url)
-
-
-# Example Usage:
-#
-# download_manager = ConcurrentDownloadManager()
-#
-# files = [
-#     ("songs/symphony.mp3", "https://filesamples.com/samples/audio/mp3/Symphony%20No.6%20(1st%20movement).mp3"),
-#     ("songs/sample4.mp3", "https://filesamples.com/samples/audio/mp3/sample4.mp3"),
-#     ("songs/sample3.mp3", "https://filesamples.com/samples/audio/mp3/sample3.mp3"),
-#     ("songs/sample2.mp3", "https://filesamples.com/samples/audio/mp3/sample2.mp3"),
-#     ("songs/sample1.mp3", "https://filesamples.com/samples/audio/mp3/sample1.mp3")
-# ]
-#
-# download_manager.downloadFiles(files)
-
-data_df = pd.read_csv("data/filtered_music_data.csv")
-downloads_manager = ConcurrentDownloadManager()
-downloads_manager.downloadFiles([(f"songs/{entry['id']}.mp3", entry['preview_url']) for _, entry in data_df.iterrows()])

@@ -3,15 +3,6 @@ import pandas as pd
 from spotipy.oauth2 import SpotifyOAuth
 from typing import List
 
-# playlist_dict = {
-#     'RNB': [
-#         'https://open.spotify.com/playlist/37i9dQZF1DX7FY5ma9162x?si=d594920df161474f',
-#     ],
-#     'HipHop': [
-#         'https://open.spotify.com/playlist/37i9dQZF1DWY6tYEFs22tT?si=e503cb873030413a',
-#         'https://open.spotify.com/playlist/37i9dQZF1DX186v583rmzp?si=c33ed9096ed841b9',
-#     ],
-# }
 pd.set_option('display.max_colwidth', None)
 
 
@@ -71,22 +62,10 @@ class TracksMetadataDownloader:
 
         partitions = [self.features_df[i:i+limit] for i in range(0, self.features_df.shape[0], limit)]
         for tracks in partitions:
-            tracks = self.sp.tracks(tracks['id'].tolist())['tracks']
+            tracks_info = self.sp.tracks(tracks['id'].tolist())['tracks']
             audio_features = pd.concat([audio_features, self.get_tracks_audio_features(tracks['id'].tolist())])
-            artist_genres = pd.concat([artist_genres, self.get_tracks_artist_genres(tracks)])
-            preview_urls = pd.concat([preview_urls, self.get_tracks_preview_urls(tracks)])
+            artist_genres = pd.concat([artist_genres, self.get_tracks_artist_genres(tracks_info)])
+            preview_urls = pd.concat([preview_urls, self.get_tracks_preview_urls(tracks_info)])
         self.features_df = pd.merge(self.features_df, audio_features, on="id", how="left")
         self.features_df = pd.merge(self.features_df, artist_genres, on="id", how="left")
         self.features_df = pd.merge(self.features_df, preview_urls, on="id", how="left")
-
-
-playlist_genre_table_df = pd.read_csv('data/playlist_genre_sheet.csv')
-playlist_genre_dict = {}
-for key, value in playlist_genre_table_df.groupby('Genre')['Playlist URL']:
-    playlist_genre_dict[key] = value.tolist()
-
-loader = TracksMetadataDownloader(playlist_genre_dict)
-loader.playlist_tracks_ids_to_df()
-loader.get_tracks_metadata()
-print(loader.features_df.isna().sum())
-loader.features_df.to_csv('data/dafeatures.csv', index=False)
